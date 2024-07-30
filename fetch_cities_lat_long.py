@@ -16,6 +16,8 @@ import click
 def my_cities(*args):
     return list(args)
 
+
+
 def create_cities_dataframe(cities=None):
 
     if cities is None:
@@ -85,12 +87,15 @@ def tsp(city_df):
         return total_distance, city_list
 
 
-def main(count):
+def main(count, df=None):
     """ Main function that runs the tsp simulation multiple times """
     distance_list = []
     city_list_list= []
 
-    cdf = create_cities_dataframe()
+    if df is not None:
+        cdf = df
+    else:
+        cdf = create_cities_dataframe()
 
     # loop through the similation
 
@@ -114,7 +119,20 @@ def main(count):
 def cli():
     """This is a command-line tool that figures out the shortest distance to visit all cities in a list"""
 
-# add click command that runs the simulation x times 
+
+@cli.command("cities")
+@click.argument("cities", nargs=-1)
+@click.option("--count", default=5, help="Number of simulation to run.")
+def cities_cli(cities, count):
+    """
+        This is a command-line tool that figures out the shortest distance to visit all cities in a list.
+        Example: ./fetch_cities_lat_long.py cities "New York" "Paris" "Bruxelles" --count 100
+    """
+
+    cities_list = my_cities(*cities)
+    cities_df = create_cities_dataframe(cities_list)
+    main(count, cities_df)
+
 @cli.command("simulate")
 @click.option("--count", default=10, help="Number of times to run the simulation.")
 def simulate(count):
@@ -128,6 +146,7 @@ def simulate(count):
 
     print(f"Running simulation {count} times")
     main(count)
+
 
 if __name__=="__main__":
     cli()
